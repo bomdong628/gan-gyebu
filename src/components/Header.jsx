@@ -1,4 +1,4 @@
-import { COLORS } from '../constants';
+import { COLORS, MENU } from '../constants';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 function Header({ activeTab, currentMonth, setCurrentMonth }) {
@@ -6,9 +6,9 @@ function Header({ activeTab, currentMonth, setCurrentMonth }) {
     <header className={`${COLORS.primary} p-6 pb-8 rounded-b-[30px] shadow-sm relative z-10`}>
       <div className='flex justify-between items-center mb-4'>
         <h1 className={`text-2xl font-black ${COLORS.accent} tracking-tight`}>
-          {activeTab === 'settings' ? '설정' : '간계부'}
+          {activeTab === MENU.SETTING ? '설정' : '간계부'}
         </h1>
-        {activeTab !== 'settings' && (
+        {activeTab !== MENU.SETTING && (
           <div className='flex gap-2'>
             <button
               onClick={() => {
