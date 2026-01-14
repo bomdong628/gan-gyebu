@@ -1,7 +1,7 @@
 import { COLORS, DEFAULT_CATEGORIES, MENU } from '../constants';
 import { formatMoney } from '../utils';
 
-function Home({ currentMonth, setActiveTab, filteredTransactions, handleStartEdit }) {
+function Home({ currentMonth, setActiveTab, filteredTransactions, onEditItemInfo }) {
   const monthlyTotal = filteredTransactions.reduce((acc, curr) => acc + curr.amount, 0);
 
   return (
@@ -106,7 +106,7 @@ function Home({ currentMonth, setActiveTab, filteredTransactions, handleStartEdi
             <div className='flex items-center gap-2'>
               <span className={`font-bold ${COLORS.text}`}>-{formatMoney(t.amount)}</span>
               <button
-                onClick={() => handleStartEdit(t)}
+                onClick={() => onEditItemInfo(t)}
                 className='p-1 text-gray-300 hover:text-[#6B4E38]'
               >
                 <Pencil size={14} />
