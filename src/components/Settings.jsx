@@ -1,6 +1,18 @@
 import { useState } from 'react';
 import { COLORS } from '../constants';
 import { Pencil, Plus, RotateCcw, Save, X } from 'lucide-react';
+import {
+  addDoc,
+  collection,
+  doc,
+  getDocs,
+  query,
+  serverTimestamp,
+  setDoc,
+  where,
+  writeBatch,
+} from 'firebase/firestore';
+import { db } from '../utils/firebase';
 
 function Settings({ categories, budgets }) {
   const [localBudgets, setLocalBudgets] = useState(budgets);
@@ -11,71 +23,56 @@ function Settings({ categories, budgets }) {
   const [editName, setEditName] = useState('');
 
   const handleAddCategory = async () => {
-    //   if (!newCategory.trim()) return;
-    //   if (categories.some((c) => c.name === newCategory.trim())) {
-    //     alert('이미 존재하는 카테고리입니다.');
-    //     return;
-    //   }
-    //   await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'categories'), {
-    //     name: newCategory.trim(),
-    //     createdAt: serverTimestamp(),
-    //   });
-    //   setNewCategory('');
+    if (!newCategory.trim()) return;
+    if (categories.some((c) => c.name === newCategory.trim())) {
+      alert('이미 존재하는 카테고리입니다.');
+      return;
+    }
+    await addDoc(collection(db, 'categories'), {
+      name: newCategory.trim(),
+      createdAt: serverTimestamp(),
+    });
+    setNewCategory('');
   };
 
   const handleSaveBudget = async (cat) => {
-    //   await setDoc(
-    //     doc(db, 'artifacts', appId, 'public', 'data', 'budgets', cat),
-    //     { amount: Number(localBudgets[cat] || 0) },
-    //     { merge: true }
-    //   );
-    //   alert(`${cat} 예산이 저장되었습니다.`);
-    // };
-    // const handleAddCategory = async () => {
-    //   if (!newCategory.trim()) return;
-    //   if (categories.some((c) => c.name === newCategory.trim())) {
-    //     alert('이미 존재하는 카테고리입니다.');
-    //     return;
-    //   }
-    //   await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'categories'), {
-    //     name: newCategory.trim(),
-    //     createdAt: serverTimestamp(),
-    //   });
-    //   setNewCategory('');
+    await setDoc(
+      doc(db, 'budgets', cat),
+      { amount: Number(localBudgets[cat] || 0) },
+      { merge: true }
+    );
+    alert(`${cat} 예산이 저장되었습니다.`);
   };
 
   // Advanced: Delete with migration
   const handleDeleteCategory = async (id, name) => {
-    //   // 1. Check if used
-    //   const q = query(
-    //     collection(db, 'artifacts', appId, 'public', 'data', 'transactions'),
-    //     where('category', '==', name)
-    //   );
-    //   const snaps = await getDocs(q);
-    //   const count = snaps.size;
-    //   let confirmMsg = `'${name}' 카테고리를 삭제하시겠습니까?`;
-    //   if (count > 0) {
-    //     confirmMsg += `\n\n⚠️ 주의: 이 카테고리로 작성된 내역이 ${count}건 있습니다.\n삭제 시 해당 내역들은 모두 '기타'로 변경됩니다.`;
-    //   }
-    //   if (!window.confirm(confirmMsg)) return;
-    //   try {
-    //     const batch = writeBatch(db);
-    //     // Delete category doc
-    //     batch.delete(doc(db, 'artifacts', appId, 'public', 'data', 'categories', id));
-    //     // Delete budget doc if exists
-    //     if (budgets[name]) {
-    //       batch.delete(doc(db, 'artifacts', appId, 'public', 'data', 'budgets', name));
-    //     }
-    //     // Migrate transactions to '기타'
-    //     snaps.forEach((d) => {
-    //       batch.update(d.ref, { category: '기타' });
-    //     });
-    //     await batch.commit();
-    //     alert('삭제 및 내역 이동이 완료되었습니다.');
-    //   } catch (e) {
-    //     console.error(e);
-    //     alert('삭제 중 오류가 발생했습니다.');
-    //   }
+    // 1. Check if used
+    const q = query(collection(db, 'transactions'), where('category', '==', name));
+    const snaps = await getDocs(q);
+    const count = snaps.size;
+    let confirmMsg = `'${name}' 카테고리를 삭제하시겠습니까?`;
+    if (count > 0) {
+      confirmMsg += `\n\n⚠️ 주의: 이 카테고리로 작성된 내역이 ${count}건 있습니다.\n삭제 시 해당 내역들은 모두 '기타'로 변경됩니다.`;
+    }
+    if (!window.confirm(confirmMsg)) return;
+    try {
+      const batch = writeBatch(db);
+      // Delete category doc
+      batch.delete(doc(db, 'categories', id));
+      // Delete budget doc if exists
+      if (budgets[name]) {
+        batch.delete(doc(db, 'budgets', name));
+      }
+      // Migrate transactions to '기타'
+      snaps.forEach((d) => {
+        batch.update(d.ref, { category: '기타' });
+      });
+      await batch.commit();
+      alert('삭제 및 내역 이동이 완료되었습니다.');
+    } catch (e) {
+      console.error(e);
+      alert('삭제 중 오류가 발생했습니다.');
+    }
   };
 
   // Advanced: Rename Category
@@ -90,49 +87,46 @@ function Settings({ categories, budgets }) {
   };
 
   const saveEdit = async (id, oldName) => {
-    //     if (!editName.trim() || editName === oldName) {
-    //       cancelEdit();
-    //       return;
-    //     }
-    //     if (categories.some((c) => c.name === editName.trim() && c.id !== id)) {
-    //       alert('이미 존재하는 이름입니다.');
-    //       return;
-    //     }
-    //     const newName = editName.trim();
-    //     if (
-    //       !window.confirm(
-    //         `'${oldName}'을(를) '${newName}'(으)로 변경하시겠습니까?\n모든 과거 내역도 함께 변경됩니다.`
-    //       )
-    //     )
-    //       return;
-    //     try {
-    //       const batch = writeBatch(db);
-    //       // 1. Update Category Doc
-    //       batch.update(doc(db, 'artifacts', appId, 'public', 'data', 'categories', id), {
-    //         name: newName,
-    //       });
-    //       // 2. Update Transactions (Batch update)
-    //       const q = query(
-    //         collection(db, 'artifacts', appId, 'public', 'data', 'transactions'),
-    //         where('category', '==', oldName)
-    //       );
-    //       const snaps = await getDocs(q);
-    //       snaps.forEach((d) => {
-    //         batch.update(d.ref, { category: newName });
-    //       });
-    //       // 3. Update Budget (Move document data)
-    //       if (budgets[oldName]) {
-    //         batch.set(doc(db, 'artifacts', appId, 'public', 'data', 'budgets', newName), {
-    //           amount: budgets[oldName],
-    //         });
-    //         batch.delete(doc(db, 'artifacts', appId, 'public', 'data', 'budgets', oldName));
-    //       }
-    //       await batch.commit();
-    //       cancelEdit();
-    //     } catch (e) {
-    //       console.error(e);
-    //       alert('수정 중 오류가 발생했습니다.');
-    //     }
+    if (!editName.trim() || editName === oldName) {
+      cancelEdit();
+      return;
+    }
+    if (categories.some((c) => c.name === editName.trim() && c.id !== id)) {
+      alert('이미 존재하는 이름입니다.');
+      return;
+    }
+    const newName = editName.trim();
+    if (
+      !window.confirm(
+        `'${oldName}'을(를) '${newName}'(으)로 변경하시겠습니까?\n모든 과거 내역도 함께 변경됩니다.`
+      )
+    )
+      return;
+    try {
+      const batch = writeBatch(db);
+      // 1. Update Category Doc
+      batch.update(doc(db, 'categories', id), {
+        name: newName,
+      });
+      // 2. Update Transactions (Batch update)
+      const q = query(collection(db, 'transactions'), where('category', '==', oldName));
+      const snaps = await getDocs(q);
+      snaps.forEach((d) => {
+        batch.update(d.ref, { category: newName });
+      });
+      // 3. Update Budget (Move document data)
+      if (budgets[oldName]) {
+        batch.set(doc(db, 'budgets', newName), {
+          amount: budgets[oldName],
+        });
+        batch.delete(doc(db, 'budgets', oldName));
+      }
+      await batch.commit();
+      cancelEdit();
+    } catch (e) {
+      console.error(e);
+      alert('수정 중 오류가 발생했습니다.');
+    }
   };
 
   return (
