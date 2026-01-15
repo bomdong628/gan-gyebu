@@ -111,6 +111,7 @@ function App() {
         {activeTab === MENU.CALENDER && (
           <Calendar currentMonth={currentMonth} filteredTransactions={filteredTransactions} />
         )}
+        {activeTab === MENU.STATS && <Stats filteredTransactions={filteredTransactions} />}
       </main>
       {activeTab !== '' && <AddBtn setIsFormOpen={setIsFormOpen} />}
       {isFormOpen && (
