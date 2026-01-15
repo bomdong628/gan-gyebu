@@ -1,5 +1,18 @@
+import {
+  Bar,
+  BarChart,
+  Cell,
+  Legend,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
 import { COLORS } from '../constants';
 import { formatMoney } from '../utils';
+import { PieChart as PieIcon, User } from 'lucide-react';
 
 function Stats({ filteredTransactions }) {
   const catTotals = {};

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { COLORS } from '../constants';
+import { Pencil, Plus, RotateCcw, Save, X } from 'lucide-react';
 
 function Settings({ categories, budgets }) {
   const [localBudgets, setLocalBudgets] = useState(budgets);
