@@ -11,6 +11,7 @@ import Calendar from './components/Calendar';
 function App() {
   const [transactions, setTransactions] = useState([]);
   const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
+  const [budgets, setBudgets] = useState({});
   const [activeTab, setActiveTab] = useState('home');
   // Filter & Sort State
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -85,6 +86,13 @@ function App() {
       });
   }, [transactions, currentMonth, searchTerm, sortConfig]);
 
+  // if (loading)
+  //   return (
+  //     <div className='flex h-screen items-center justify-center bg-[#FEFDF5] text-[#6B4E38]'>
+  //       로딩중...
+  //     </div>
+  //   );
+
   return (
     <div
       className={`min-h-screen ${COLORS.bg} font-sans pb-20 max-w-md mx-auto shadow-2xl overflow-hidden`}
@@ -112,6 +120,7 @@ function App() {
           <Calendar currentMonth={currentMonth} filteredTransactions={filteredTransactions} />
         )}
         {activeTab === MENU.STATS && <Stats filteredTransactions={filteredTransactions} />}
+        {activeTab === MENU.SETTING && <Settings categories={categories} budgets={budgets} />}
       </main>
       {activeTab !== '' && <AddBtn setIsFormOpen={setIsFormOpen} />}
       {isFormOpen && (
