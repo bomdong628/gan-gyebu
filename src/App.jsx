@@ -6,6 +6,7 @@ import Footer from './components/Footer';
 import AddBtn from './components/AddBtn';
 import InputModal from './components/InputModal';
 import List from './components/List';
+import Calendar from './components/Calendar';
 
 function App() {
   const [transactions, setTransactions] = useState([]);
@@ -106,6 +107,9 @@ function App() {
             filteredTransactions={filteredTransactions}
             onEditItemInfo={onEditItemInfo}
           />
+        )}
+        {activeTab === MENU.CALENDER && (
+          <Calendar currentMonth={currentMonth} filteredTransactions={filteredTransactions} />
         )}
       </main>
       {activeTab !== '' && <AddBtn setIsFormOpen={setIsFormOpen} />}
