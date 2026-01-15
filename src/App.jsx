@@ -7,6 +7,8 @@ import AddBtn from './components/AddBtn';
 import InputModal from './components/InputModal';
 import List from './components/List';
 import Calendar from './components/Calendar';
+import Settings from './components/Settings';
+import Stats from './components/Stats';
 
 function App() {
   const [transactions, setTransactions] = useState([]);
