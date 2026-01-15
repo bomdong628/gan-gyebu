@@ -5,6 +5,7 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import AddBtn from './components/AddBtn';
 import InputModal from './components/InputModal';
+import List from './components/List';
 
 function App() {
   const [transactions, setTransactions] = useState([]);
@@ -93,6 +94,15 @@ function App() {
           <Home
             currentMonth={currentMonth}
             setActiveTab={setActiveTab}
+            filteredTransactions={filteredTransactions}
+            onEditItemInfo={onEditItemInfo}
+          />
+        )}
+        {activeTab === MENU.LIST && (
+          <List
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            setSortConfig={setSortConfig}
             filteredTransactions={filteredTransactions}
             onEditItemInfo={onEditItemInfo}
           />
