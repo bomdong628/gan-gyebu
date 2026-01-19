@@ -39,7 +39,7 @@ function Settings({ categories, budgets }) {
     await setDoc(
       doc(db, 'budgets', cat),
       { amount: Number(localBudgets[cat] || 0) },
-      { merge: true }
+      { merge: true },
     );
     alert(`${cat} 예산이 저장되었습니다.`);
   };
@@ -98,7 +98,7 @@ function Settings({ categories, budgets }) {
     const newName = editName.trim();
     if (
       !window.confirm(
-        `'${oldName}'을(를) '${newName}'(으)로 변경하시겠습니까?\n모든 과거 내역도 함께 변경됩니다.`
+        `'${oldName}'을(를) '${newName}'(으)로 변경하시겠습니까?\n모든 과거 내역도 함께 변경됩니다.`,
       )
     )
       return;
@@ -157,7 +157,7 @@ function Settings({ categories, budgets }) {
 
         {/* List & Edit */}
         <div className='flex flex-col gap-2'>
-          {categories.map((cat) => (
+          {categories?.map((cat) => (
             <div
               key={cat.id}
               className='flex items-center justify-between bg-[#F0E6D2] px-4 py-2 rounded-xl text-sm text-[#5A4635]'
@@ -206,7 +206,7 @@ function Settings({ categories, budgets }) {
       <div className={`${COLORS.white} p-5 rounded-xl border ${COLORS.border} shadow-sm`}>
         <h3 className={`font-bold ${COLORS.text} mb-4`}>카테고리별 예산 설정</h3>
         <div className='space-y-3'>
-          {categories.map((cat) => (
+          {categories?.map((cat) => (
             <div key={cat.id} className='flex items-center gap-2'>
               <span className='w-16 text-sm text-gray-600 truncate'>{cat.name}</span>
               <input

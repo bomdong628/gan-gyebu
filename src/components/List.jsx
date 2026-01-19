@@ -1,3 +1,4 @@
+import { Pencil, Trash2 } from 'lucide-react';
 import { COLORS } from '../constants';
 
 function List({ searchTerm, setSearchTerm, setSortConfig, filteredTransactions, onEditItemInfo }) {
@@ -61,8 +62,8 @@ function List({ searchTerm, setSearchTerm, setSortConfig, filteredTransactions, 
                     t.payer === '남편'
                       ? 'bg-blue-50 text-blue-600'
                       : t.payer === '아내'
-                      ? 'bg-pink-50 text-pink-600'
-                      : 'bg-gray-100'
+                        ? 'bg-pink-50 text-pink-600'
+                        : 'bg-gray-100'
                   }`}
                 >
                   {t.payer}

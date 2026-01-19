@@ -1,7 +1,8 @@
-import { COLORS, DEFAULT_CATEGORIES, MENU } from '../constants';
+import { Pencil } from 'lucide-react';
+import { COLORS, MENU } from '../constants';
 import { formatMoney } from '../utils';
 
-function Home({ currentMonth, setActiveTab, filteredTransactions, onEditItemInfo }) {
+function Home({ categories, currentMonth, setActiveTab, filteredTransactions, onEditItemInfo }) {
   const monthlyTotal = filteredTransactions.reduce((acc, curr) => acc + curr.amount, 0);
 
   return (
@@ -16,7 +17,7 @@ function Home({ currentMonth, setActiveTab, filteredTransactions, onEditItemInfo
 
         {/* Progress Bars */}
         <div className='flex gap-2 mt-2 w-full justify-center flex-wrap px-2'>
-          {DEFAULT_CATEGORIES.map((cat) => {
+          {categories?.map((cat) => {
             const catName = cat.name;
             const limit = null;
             // const limit = budgets[catName];
