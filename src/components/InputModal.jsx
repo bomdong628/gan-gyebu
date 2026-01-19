@@ -1,7 +1,52 @@
-import { COLORS, DEFAULT_CATEGORIES, METHODS, PAYERS } from '../constants';
+import { addDoc, collection, doc, serverTimestamp, updateDoc } from 'firebase/firestore';
+import { COLORS, METHODS, PAYERS } from '../constants';
+import { db } from '../utils/firebase';
 
-function InputModal({ itemInfo, onChangeItemInfo, onCloseInputModal, editTransactionId }) {
-  const handleSaveTransaction = () => console.log('save!');
+function InputModal({
+  itemInfo,
+  categories,
+  onChangeItemInfo,
+  onCloseInputModal,
+  editTransactionId,
+}) {
+  // Helper: Add or Update Transaction
+  const handleSaveTransaction = async (e) => {
+    e.preventDefault();
+    if (!itemInfo?.amount || categories[0]?.name || !itemInfo?.date) return;
+
+    const finalCategory = itemInfo?.category || '기타';
+    const transactionData = {
+      ...itemInfo,
+      amount: Number(itemInfo?.amount),
+      category: finalCategory,
+      type: 'expense',
+    };
+
+    try {
+      if (editTransactionId) {
+        // Update existing
+        const docRef = doc(
+          db,
+
+          'transactions',
+          editTransactionId,
+        );
+        await updateDoc(docRef, transactionData);
+        alert('수정되었습니다.');
+      } else {
+        // Create new
+        await addDoc(collection(db, 'transactions'), {
+          ...transactionData,
+          createdAt: serverTimestamp(),
+        });
+      }
+
+      onCloseInputModal();
+    } catch (err) {
+      console.error('Save Error:', err);
+      alert('저장에 실패했습니다.');
+    }
+  };
 
   return (
     <div className='fixed inset-0 bg-black/50 z-[60] flex items-end sm:items-center justify-center'>
@@ -76,9 +121,9 @@ function InputModal({ itemInfo, onChangeItemInfo, onCloseInputModal, editTransac
               onChange={(e) => onChangeItemInfo({ name: 'category', value: e.target.value })}
               className='flex-1 p-3 rounded-xl border border-[#E0D0B8] bg-white text-sm'
             >
-              {DEFAULT_CATEGORIES.map((c) => (
-                <option key={c} value={c}>
-                  {c}
+              {categories?.map((c) => (
+                <option key={c?.id} value={c?.name}>
+                  {c?.name}
                 </option>
               ))}
             </select>

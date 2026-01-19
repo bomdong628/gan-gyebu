@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { COLORS, DEFAULT_CATEGORIES, MENU } from './constants';
 import Home from './components/Home';
 import Header from './components/Header';
@@ -9,11 +9,25 @@ import List from './components/List';
 import Calendar from './components/Calendar';
 import Settings from './components/Settings';
 import Stats from './components/Stats';
+import {
+  collection,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  orderBy,
+  query,
+  serverTimestamp,
+  writeBatch,
+} from 'firebase/firestore';
+import { onAuthStateChanged, signInAnonymously } from 'firebase/auth';
+import { auth, db } from './utils/firebase';
 
 function App() {
+  const [user, setUser] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
   const [budgets, setBudgets] = useState({});
+  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('home');
   // Filter & Sort State
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -62,10 +76,98 @@ function App() {
     onChangeItemInfo({ name: 'date', value: new Date().toISOString().split('T')[0] });
     onChangeItemInfo({ name: 'payer', value: '공동' });
     onChangeItemInfo({ name: 'method', value: '카드' });
-    // Reset date to today only if we were editing (optional UX choice)
-    // Keeping last used date might be convenient, but standard is reset
-    if (categories.length > 0) onChangeItemInfo({ name: 'category', value: categories[0].name });
+    if (categories.length > 0) {
+      onChangeItemInfo({ name: 'category', value: categories[0].name });
+    } else {
+      onChangeItemInfo({ name: 'category', value: '' });
+    }
   };
+
+  // Helper: Delete Transaction
+  const onDeleteItemInfo = async (id) => {
+    if (window.confirm('정말 삭제하시겠습니까?')) {
+      await deleteDoc(doc(db, 'transactions', id));
+    }
+  };
+
+  // 1. Auth Initialization (내 계정용)
+  useEffect(() => {
+    // 1. 바로 익명 로그인 시도
+    signInAnonymously(auth).catch((error) => {
+      console.error('로그인 실패:', error);
+    });
+
+    // 2. 로그인 상태 변화 감지
+    const unsubscribe = onAuthStateChanged(auth, (u) => {
+      setUser(u);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // 2. Data Fetching (Categories) - Seeding if empty
+  useEffect(() => {
+    if (!user) return;
+    const q = query(collection(db, 'categories'), orderBy('createdAt', 'asc'));
+
+    const unsubscribe = onSnapshot(q, async (snapshot) => {
+      if (snapshot.empty) {
+        const batch = writeBatch(db);
+        DEFAULT_CATEGORIES.forEach((catName) => {
+          const newRef = doc(collection(db, 'categories'));
+          batch.set(newRef, {
+            name: catName,
+            createdAt: serverTimestamp(),
+          });
+        });
+        await batch.commit().catch((e) => console.log('Seeding skipped', e));
+      } else {
+        const cats = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+        setCategories(cats);
+        if (!itemInfo?.category && cats.length > 0) {
+          onChangeItemInfo({ name: 'category', value: cats[0].name });
+        }
+      }
+    });
+    return () => unsubscribe();
+  }, [user]);
+
+  // 3. Data Fetching (Transactions)
+  useEffect(() => {
+    console.log(user, 'user');
+    if (!user) return;
+    const q = query(collection(db, 'transactions'));
+    console.log(q, 'q');
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const data = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setTransactions(data);
+        setLoading(false);
+      },
+      (error) => {
+        console.error('Data Fetch Error:', error);
+        setLoading(false);
+      },
+    );
+    return () => unsubscribe();
+  }, [user]);
+
+  // 4. Data Fetching (Budgets)
+  useEffect(() => {
+    if (!user) return;
+    const q = query(collection(db, 'budgets'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const budgetData = {};
+      snapshot.docs.forEach((doc) => {
+        budgetData[doc.id] = doc.data().amount;
+      });
+      setBudgets(budgetData);
+    });
+    return () => unsubscribe();
+  }, [user]);
 
   const filteredTransactions = useMemo(() => {
     return transactions
@@ -88,12 +190,12 @@ function App() {
       });
   }, [transactions, currentMonth, searchTerm, sortConfig]);
 
-  // if (loading)
-  //   return (
-  //     <div className='flex h-screen items-center justify-center bg-[#FEFDF5] text-[#6B4E38]'>
-  //       로딩중...
-  //     </div>
-  //   );
+  if (loading)
+    return (
+      <div className='flex h-screen items-center justify-center bg-[#FEFDF5] text-[#6B4E38]'>
+        로딩중...
+      </div>
+    );
 
   return (
     <div
@@ -103,6 +205,7 @@ function App() {
       <main className='px-4 -mt-6 relative z-20'>
         {activeTab === MENU.HOME && (
           <Home
+            categories={categories}
             currentMonth={currentMonth}
             setActiveTab={setActiveTab}
             filteredTransactions={filteredTransactions}
@@ -128,6 +231,7 @@ function App() {
       {isFormOpen && (
         <InputModal
           itemInfo={itemInfo}
+          categories={categories}
           onChangeItemInfo={onChangeItemInfo}
           onCloseInputModal={onCloseInputModal}
           editTransactionId={editTransactionId}
