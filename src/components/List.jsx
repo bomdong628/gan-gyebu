@@ -1,7 +1,13 @@
+import { useState } from 'react';
 import { Pencil, Trash2 } from 'lucide-react';
 import { COLORS } from '../constants';
+import { deleteDoc, doc } from 'firebase/firestore';
+import { db } from '../utils/firebase';
 
 function List({ searchTerm, setSearchTerm, setSortConfig, filteredTransactions, onEditItemInfo }) {
+  // ✨ (변경) 삭제 확인용 ID 저장소 (모달 대신 사용)
+  const [deleteConfirmId, setDeleteConfirmId] = useState(null);
+
   const handleSort = (key) => {
     setSortConfig((prev) => ({
       key,
@@ -9,10 +15,21 @@ function List({ searchTerm, setSearchTerm, setSortConfig, filteredTransactions, 
     }));
   };
   const handleDelete = async (id) => {
-    console.log('id', id);
-    // if (window.confirm('정말 삭제하시겠습니까?')) {
-    //   await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'transactions', id));
-    // }
+    if (deleteConfirmId === id) {
+      // 두 번째 클릭: 진짜 삭제 실행
+      try {
+        await deleteDoc(doc(db, 'transactions', id));
+        setDeleteConfirmId(null); // 상태 초기화
+      } catch (error) {
+        console.error('Delete Error', error);
+        alert('삭제에 실패했습니다.');
+      }
+    } else {
+      // 첫 번째 클릭: "진짜 지울거니?" 상태로 변경
+      setDeleteConfirmId(id);
+      // 3초 동안 안 누르면 다시 원래대로 복구 (실수 방지)
+      setTimeout(() => setDeleteConfirmId(null), 3000);
+    }
   };
   return (
     <div className='space-y-4'>
@@ -81,7 +98,7 @@ function List({ searchTerm, setSearchTerm, setSortConfig, filteredTransactions, 
                 </button>
                 <button
                   onClick={() => handleDelete(t.id)}
-                  className='p-1 text-gray-400 hover:text-red-400'
+                  className={`p-1 transition-all ${deleteConfirmId === t.id ? 'text-red-500 bg-red-100 rounded-full scale-110' : 'text-gray-400 hover:text-red-400'}`}
                 >
                   <Trash2 size={14} />
                 </button>
