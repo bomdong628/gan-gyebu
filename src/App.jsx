@@ -122,6 +122,12 @@ function App() {
         await batch.commit().catch((e) => console.log('Seeding skipped', e));
       } else {
         const cats = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+        cats.sort((a, b) => {
+          if (a.order !== undefined && b.order !== undefined) return a.order - b.order;
+          // order가 없는 옛날 데이터 대비용
+          if (a.createdAt && b.createdAt) return a.createdAt - b.createdAt;
+          return 0;
+        });
         setCategories(cats);
         if (!itemInfo?.category && cats.length > 0) {
           onChangeItemInfo({ name: 'category', value: cats[0].name });
@@ -200,7 +206,7 @@ function App() {
       className={`min-h-screen ${COLORS.bg} font-sans pb-20 max-w-md mx-auto shadow-2xl overflow-hidden`}
     >
       <Header activeTab={activeTab} currentMonth={currentMonth} setCurrentMonth={setCurrentMonth} />
-      <main className='px-4 -mt-6 relative z-20'>
+      <main className='px-4 -mt-6 relative z-20 pb-24'>
         {activeTab === MENU.HOME && (
           <Home
             categories={categories}

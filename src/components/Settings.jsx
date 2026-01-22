@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { COLORS } from '../constants';
-import { Pencil, Plus, RotateCcw, Save, X } from 'lucide-react';
+import { Pencil, Plus, RotateCcw, Save, X, ArrowUp, ArrowDown } from 'lucide-react';
 import {
   addDoc,
   collection,
@@ -30,6 +30,7 @@ function Settings({ categories, budgets }) {
     }
     await addDoc(collection(db, 'categories'), {
       name: newCategory.trim(),
+      order: categories.length,
       createdAt: serverTimestamp(),
     });
     setNewCategory('');
@@ -72,6 +73,32 @@ function Settings({ categories, budgets }) {
     } catch (e) {
       console.error(e);
       alert('삭제 중 오류가 발생했습니다.');
+    }
+  };
+
+  const handleMoveCategory = async (index, direction) => {
+    // 맨 위나 맨 아래면 동작 안 함
+    if (direction === 'up' && index === 0) return;
+    if (direction === 'down' && index === categories.length - 1) return;
+
+    const newCats = [...categories];
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+
+    // 1. 화면상에서 먼저 순서 바꾸기 (빠른 반응성)
+    [newCats[index], newCats[targetIndex]] = [newCats[targetIndex], newCats[index]];
+
+    // 2. DB에 변경된 순서 일괄 업데이트
+    const batch = writeBatch(db); // import { writeBatch } from 'firebase/firestore' 필요
+    newCats.forEach((cat, idx) => {
+      const ref = doc(db, 'categories', cat.id);
+      batch.update(ref, { order: idx });
+    });
+
+    try {
+      await batch.commit();
+    } catch (e) {
+      console.error('순서 저장 실패', e);
+      alert('순서 저장에 실패했습니다.');
     }
   };
 
@@ -157,7 +184,7 @@ function Settings({ categories, budgets }) {
 
         {/* List & Edit */}
         <div className='flex flex-col gap-2'>
-          {categories?.map((cat) => (
+          {categories?.map((cat, index) => (
             <div
               key={cat.id}
               className='flex items-center justify-between bg-[#F0E6D2] px-4 py-2 rounded-xl text-sm text-[#5A4635]'
@@ -182,6 +209,23 @@ function Settings({ categories, budgets }) {
                 <>
                   <span>{cat.name}</span>
                   <div className='flex items-center gap-2'>
+                    <button
+                      onClick={() => handleMoveCategory(index, 'up')}
+                      disabled={index === 0}
+                      className={`text-gray-500 hover:text-[#6B4E38] ${index === 0 ? 'opacity-30' : ''}`}
+                    >
+                      <ArrowUp size={16} />
+                    </button>
+
+                    <button
+                      onClick={() => handleMoveCategory(index, 'down')}
+                      disabled={index === categories.length - 1}
+                      className={`text-gray-500 hover:text-[#6B4E38] ${index === categories.length - 1 ? 'opacity-30' : ''}`}
+                    >
+                      <ArrowDown size={16} />
+                    </button>
+
+                    <div className='w-px h-4 bg-gray-300 mx-1'></div>
                     <button
                       onClick={() => startEdit(cat)}
                       className='text-gray-500 hover:text-[#6B4E38]'
