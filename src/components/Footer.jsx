@@ -4,9 +4,9 @@ import { COLORS, MENU } from '../constants';
 function Footer({ activeTab, setActiveTab }) {
   return (
     <nav
-      className={`fixed bottom-0 left-0 right-0 ${COLORS.white} border-t ${COLORS.border} pb-safe pt-2 max-w-md mx-auto z-40`}
+      className={`fixed bottom-0 left-0 right-0 ${COLORS.white} border-t ${COLORS.border} pt-4 max-w-md mx-auto z-40 pb-[env(safe-area-inset-bottom)]`}
     >
-      <div className='flex justify-around items-center h-14'>
+      <div className='flex justify-around items-center h-14 pb-5'>
         <button
           onClick={() => setActiveTab(MENU.HOME)}
           className={`flex flex-col items-center gap-1 w-14 ${

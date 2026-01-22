@@ -133,10 +133,8 @@ function App() {
 
   // 3. Data Fetching (Transactions)
   useEffect(() => {
-    console.log(user, 'user');
     if (!user) return;
     const q = query(collection(db, 'transactions'));
-    console.log(q, 'q');
     const unsubscribe = onSnapshot(
       q,
       (snapshot) => {
@@ -227,7 +225,7 @@ function App() {
         {activeTab === MENU.STATS && <Stats filteredTransactions={filteredTransactions} />}
         {activeTab === MENU.SETTING && <Settings categories={categories} budgets={budgets} />}
       </main>
-      {activeTab !== '' && <AddBtn setIsFormOpen={setIsFormOpen} />}
+      {(activeTab !== '' || activeTab !== MENU.SETTING) && <AddBtn setIsFormOpen={setIsFormOpen} />}
       {isFormOpen && (
         <InputModal
           itemInfo={itemInfo}
@@ -238,6 +236,7 @@ function App() {
         />
       )}
       <Footer activeTab={activeTab} setActiveTab={setActiveTab} />
+      <div className='h-[env(safe-area-inset-bottom)] w-full bg-white fixed bottom-0 left-0 right-0 -z-10'></div>
     </div>
   );
 }

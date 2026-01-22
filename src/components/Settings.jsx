@@ -208,13 +208,13 @@ function Settings({ categories, budgets }) {
         <div className='space-y-3'>
           {categories?.map((cat) => (
             <div key={cat.id} className='flex items-center gap-2'>
-              <span className='w-16 text-sm text-gray-600 truncate'>{cat.name}</span>
+              <span className='w-24 text-sm text-gray-600 truncate'>{cat.name}</span>
               <input
                 type='number'
                 value={localBudgets[cat.name] || ''}
                 onChange={(e) => setLocalBudgets({ ...localBudgets, [cat.name]: e.target.value })}
                 placeholder='0'
-                className='flex-1 p-2 border rounded-lg text-sm bg-[#FEFDF5]'
+                className='flex-1 p-2 w-10 border rounded-lg text-sm bg-[#FEFDF5]'
               />
               <button
                 onClick={() => handleSaveBudget(cat.name)}

@@ -3,8 +3,10 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 function Header({ activeTab, currentMonth, setCurrentMonth }) {
   return (
-    <header className={`${COLORS.primary} p-6 pb-8 rounded-b-[30px] shadow-sm relative z-10`}>
-      <div className='flex justify-between items-center mb-4'>
+    <header
+      className={`${COLORS.primary} p-6 pb-8 pt-[env(safe-area-inset-top)] rounded-b-[30px] shadow-sm relative z-10`}
+    >
+      <div className='flex justify-between items-center mb-4 pt-5'>
         <h1 className={`text-2xl font-black ${COLORS.accent} tracking-tight`}>
           {activeTab === MENU.SETTING ? '설정' : '간계부'}
         </h1>

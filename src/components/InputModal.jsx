@@ -12,7 +12,7 @@ function InputModal({
   // Helper: Add or Update Transaction
   const handleSaveTransaction = async (e) => {
     e.preventDefault();
-    if (!itemInfo?.amount || categories[0]?.name || !itemInfo?.date) return;
+    if (!itemInfo?.amount || !itemInfo?.date) return;
 
     const finalCategory = itemInfo?.category || '기타';
     const transactionData = {
@@ -51,7 +51,7 @@ function InputModal({
   return (
     <div className='fixed inset-0 bg-black/50 z-[60] flex items-end sm:items-center justify-center'>
       <div
-        className={`${COLORS.bg} w-full max-w-md p-6 rounded-t-3xl sm:rounded-3xl shadow-2xl animate-slide-up max-h-[90vh] overflow-y-auto`}
+        className={`${COLORS.bg} w-full max-w-md p-6 rounded-t-3xl sm:rounded-3xl shadow-2xl animate-slide-up max-h-[90vh] overflow-y-auto pt-10 pb-10`}
         // onPaste={handlePaste} // Add paste handler here
         tabIndex={0} // Make it focusable for paste
       >
