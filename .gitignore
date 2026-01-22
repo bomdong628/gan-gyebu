@@ -22,3 +22,50 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# --- 일반적인 설정 ---
+
+node_modules/
+dist/
+build/
+.DS_Store
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# --- 안드로이드 (Android) 관련 무시 ---
+
+# 빌드 결과물 (APK 포함)
+
+android/app/build/
+android/build/
+android/.gradle/
+
+# 로컬 설정 (절대 올리면 안 됨)
+
+local.properties
+android/local.properties
+
+# 안드로이드 스튜디오/IntelliJ 설정
+
+.idea/
+*.iml
+*.ide
+.gradle/
+captures/
+.externalNativeBuild/
+.cxx/
+
+# 키스토어 (앱 서명 키 - 보안상 절대 올리면 안 됨)
+
+*.jks
+*.keystore
+*.key
+
+# --- Capacitor 관련 ---
+
+# Capacitor가 생성하는 웹 자산 폴더 (보통 dist를 쓰므로 무시)
+
+www/
